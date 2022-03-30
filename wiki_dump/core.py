@@ -51,7 +51,7 @@ class WikiDump:
 
     mirror: Mirror
     session: Session
-    raw_response_json: dict
+    response_json: dict
     _cached_wikis: Dict[str, wiki_dump.Wiki]
 
     def __init__(self,
