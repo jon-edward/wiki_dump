@@ -52,7 +52,7 @@ class WikiDump:
     mirror: Mirror
     session: Session
     response_json: dict
-    _cached_wikis: Dict[str, wiki_dump.Wiki]
+    _cached_wikis: Dict[str, wiki_dump.api_response.Wiki]
 
     def __init__(self,
                  mirror: Union[str, Mirror] = "wikimedia",
