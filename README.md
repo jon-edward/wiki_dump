@@ -11,7 +11,7 @@ navigation of its contents offline.
 
 A web crawler might make multiple requests to find its file (in addition to 
 navigating with the notorious fragility of a web crawler), while `wiki_data_dump` 
-caches the site's contents - allowing not only a speed boost for multiple 
+caches the site's contents - which not only provides a speed boost for multiple 
 uses of the library but protects against accidentally flooding
 Wikimedia with requests by not relying on requests for site navigation.
 
@@ -19,7 +19,7 @@ Wikimedia with requests by not relying on requests for site navigation.
 `pip install wiki_data_dump`
 
 ## Usage
-One could easily get all available job names for any given wiki with 
+One could easily get all available job names for any given wiki with this 
 short script:
 
 ```python
@@ -42,8 +42,8 @@ categories: Job = wiki.get_job("enwiki", "categorytables")
 print(categories.files.keys())
 ```
 
-A slightly more nontrivial example - next we'll demonstrate the ease in querying
-for specific file types when a job may contain more files than we need.
+A slightly more nontrivial example - querying for specific file types when a job 
+may contain more files than we need.
 
 For example, it's not uncommon to find a job that has partial data dumps - making
 it necessary to know the file paths of all parts. If you're hard-coding all the 
