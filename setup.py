@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="wiki_dump",
+    name="wiki_data_dump",
     version="0.0.1",
     author="jon-edward",
     author_email="arithmatlic@gmail.com",
@@ -12,12 +12,15 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jon-edward/wiki_dump",
+    keywords=["wikimedia", "wiki data dumps", "wikipedia"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=["requests", "tqdm"],
-    packages=setuptools.find_packages(where="wiki_dump"),
+    install_requires=[
+        "requests", "tqdm"
+    ],
+    packages=setuptools.find_packages(where="wiki_data_dump"),
     python_requires=">=3.8",
 )

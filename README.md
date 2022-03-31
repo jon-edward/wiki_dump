@@ -1,4 +1,4 @@
-# wiki_dump
+# wiki_data_dump
 A library that assists in traversing and downloading from 
 [Wikimedia Data Dumps](https://dumps.wikimedia.org) and its mirrors.
 
@@ -10,20 +10,20 @@ accessing only the index of the site, and doing the inevitable searching and
 navigation of its contents offline. 
 
 A web crawler might make multiple requests to find its file (in addition to 
-navigating with the notorious fragility of a web crawler), while `wiki_dump` 
+navigating with the notorious fragility of a web crawler), while `wiki_data_dump` 
 caches the site's contents - allowing not only a speed boost for multiple 
 uses of the library but protects against accidentally flooding
 Wikimedia with requests by not relying on requests for site navigation.
 
 ## Installation
-`pip install wiki_dump`
+`pip install wiki_data_dump`
 
 ## Usage
 One could easily get all available job names for any given wiki with 
 short script:
 
 ```python
-from wiki_dump import WikiDump, Wiki
+from wiki_data_dump import WikiDump, Wiki
 
 wiki = WikiDump()
 en_wiki: Wiki = wiki.get_wiki('enwiki')
@@ -34,7 +34,7 @@ print(en_wiki.jobs.keys())
 Or, you could see the available files from the `categorytables` sql job.
 
 ```python
-from wiki_dump import WikiDump, Job
+from wiki_data_dump import WikiDump, Job
 
 wiki = WikiDump()
 categories: Job = wiki.get_job("enwiki", "categorytables")
@@ -49,9 +49,9 @@ For example, it's not uncommon to find a job that has partial data dumps - makin
 it necessary to know the file paths of all parts. If you're hard-coding all the 
 file names, it becomes increasingly difficult to find the relevant files.
 
-This is a solution that `wiki_dump` provides:
+This is a solution that `wiki_data_dump` provides:
 ```python
-from wiki_dump import WikiDump, File
+from wiki_data_dump import WikiDump, File
 import re
 from typing import List
 

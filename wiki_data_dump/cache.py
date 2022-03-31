@@ -5,7 +5,7 @@ import re
 from typing import Optional, NamedTuple, List
 import unicodedata
 
-from wiki_dump.mirrors import Mirror
+from wiki_data_dump.mirrors import Mirror
 
 
 CACHE_LOCATION = os.path.join(os.path.dirname(__file__), "_caches")

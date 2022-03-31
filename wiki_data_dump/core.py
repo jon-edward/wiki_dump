@@ -10,10 +10,10 @@ import json
 import tqdm as tqdm
 from requests import Session
 
-from wiki_dump.mirrors import Mirror, _name_to_mirror
-import wiki_dump.cache
-import wiki_dump.api_response
-import wiki_dump.download
+from wiki_data_dump.mirrors import Mirror, _name_to_mirror
+import wiki_data_dump.cache
+import wiki_data_dump.api_response
+import wiki_data_dump.download
 
 
 def _get_index_contents(mirror: Mirror, sess: Session) -> str:
@@ -46,13 +46,13 @@ def _get_index_contents(mirror: Mirror, sess: Session) -> str:
 
 
 class WikiDump:
-    """Primary class of wiki_dump, holds logic for getting items from the index of the mirror's site and provides
+    """Primary class of wiki_data_dump, holds logic for getting items from the index of the mirror's site and provides
     utilities for downloading linked files."""
 
     mirror: Mirror
     session: Session
     response_json: dict
-    _cached_wikis: Dict[str, wiki_dump.api_response.Wiki]
+    _cached_wikis: Dict[str, wiki_data_dump.api_response.Wiki]
 
     def __init__(self,
                  mirror: Union[str, Mirror] = "wikimedia",
@@ -70,12 +70,12 @@ class WikiDump:
         self._update_response()
 
         if clear_expired_caches:
-            wiki_dump.cache.clear_expired_caches()
+            wiki_data_dump.cache.clear_expired_caches()
 
     def _update_response(self) -> None:
         """Used internally for getting cached json response contents, and caching new index files as needed."""
         self._cached_wikis = {}
-        _cache = wiki_dump.cache.get_cache(self.mirror)
+        _cache = wiki_data_dump.cache.get_cache(self.mirror)
 
         if _cache.content:
             content = _cache.content
@@ -104,13 +104,13 @@ class WikiDump:
         # isn't required
 
     @overload
-    def __getitem__(self, item: str) -> wiki_dump.api_response.Wiki: ...
+    def __getitem__(self, item: str) -> wiki_data_dump.api_response.Wiki: ...
     @overload
-    def __getitem__(self, item: Tuple[str]) -> wiki_dump.api_response.Wiki: ...
+    def __getitem__(self, item: Tuple[str]) -> wiki_data_dump.api_response.Wiki: ...
     @overload
-    def __getitem__(self, item: Tuple[str, str]) -> wiki_dump.api_response.Job: ...
+    def __getitem__(self, item: Tuple[str, str]) -> wiki_data_dump.api_response.Job: ...
     @overload
-    def __getitem__(self, item: Tuple[str, str, Union[str, re.Pattern]]) -> wiki_dump.api_response.File: ...
+    def __getitem__(self, item: Tuple[str, str, Union[str, re.Pattern]]) -> wiki_data_dump.api_response.File: ...
 
     def __getitem__(self, item: Union[tuple, str]):
         """Convenience method for get_wiki, get_job, and get_file. Caches on every call."""
@@ -125,26 +125,26 @@ class WikiDump:
             return self.get_file(*item)
         raise TypeError("Argument must be a string, or a tuple containing <= 3 strings.")
 
-    def get_wiki(self, wiki_name: str, cache: bool = True) -> wiki_dump.api_response.Wiki:
+    def get_wiki(self, wiki_name: str, cache: bool = True) -> wiki_data_dump.api_response.Wiki:
         """Get Wiki instance associated with wiki_name. Optionally caches result."""
         try:
             return self._cached_wikis[wiki_name]
         except KeyError:
-            result = wiki_dump.api_response.Wiki(**self._raw_response_json['wikis'][wiki_name])
+            result = wiki_data_dump.api_response.Wiki(**self._raw_response_json['wikis'][wiki_name])
             if not cache:
                 return result
             self._cached_wikis[wiki_name] = result
         return self._cached_wikis[wiki_name]
 
     def get_job(self, wiki_name: str,
-                job_name: str, cache: bool = True) -> wiki_dump.api_response.Job:
+                job_name: str, cache: bool = True) -> wiki_data_dump.api_response.Job:
         """Get Job instance associated with wiki_name and job_name. Optionally caches result."""
         wiki = self.get_wiki(wiki_name, cache=cache)
         return wiki.jobs[job_name]
 
     def get_file(self, wiki_name,
                  job_name, file_identifier: Union[str, re.Pattern],
-                 cache: bool = True) -> wiki_dump.api_response.File:
+                 cache: bool = True) -> wiki_data_dump.api_response.File:
         """Get File instance associated with wiki_name, job_name, and file_identifier. Optionally caches result."""
         job = self.get_job(wiki_name, job_name, cache=cache)
         return job.get_file(file_identifier)
@@ -155,7 +155,7 @@ class WikiDump:
         return [k for k in self._raw_response_json['wikis'].keys() if self._raw_response_json['wikis'][k]]
 
     def download(self,
-                 file: wiki_dump.api_response.File,
+                 file: wiki_data_dump.api_response.File,
                  destination: str = None,
                  decompress: bool = True) -> threading.Thread:
         """Downloads a File with an optional supplied destination - if no destination is supplied then it will be
@@ -164,7 +164,7 @@ class WikiDump:
 
          Returns the Thread instance that the download is running on."""
 
-        return wiki_dump.download.base_download(
+        return wiki_data_dump.download.base_download(
             from_location=urllib.parse.urljoin(self.mirror.index_location, file.url),
             to_location=destination,
             sha1=file.sha1,
@@ -179,7 +179,7 @@ class WikiDump:
 
         for wiki_name in self.wikis:
             for job_name, job in self.get_wiki(wiki_name, cache=False).jobs.items():
-                job: wiki_dump.api_response.Job
+                job: wiki_data_dump.api_response.Job
                 if not job.files:
                     continue
                 for file in job.files.keys():
