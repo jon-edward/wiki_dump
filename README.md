@@ -84,3 +84,8 @@ given time.
 the current date has passed the cache's creation date.
 * The ability to access Wikimedia downloads available in 
 [`/other/`](https://dumps.wikimedia.org/other/).
+
+## Disclaimer
+The author of this software is not affiliated, associated, authorized, endorsed by, 
+or in any way officially connected with Wikimedia or any of its affiliates and is 
+independently owned and created.
