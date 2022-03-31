@@ -21,6 +21,6 @@ setuptools.setup(
     install_requires=[
         "requests", "tqdm"
     ],
-    packages=setuptools.find_packages(where="wiki_data_dump"),
+    packages=setuptools.find_packages(include=["wiki_data_dump"]),
     python_requires=">=3.8",
 )
