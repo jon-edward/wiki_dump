@@ -65,6 +65,8 @@ class WikiDump:
 
         if session is None:
             session = Session()
+            session.headers['User-Agent'] = "wiki_data_dump/0.0.3 " \
+                                            "(https://github.com/jon-edward/wiki_dump)"
         self.session = session
 
         self._update_response()
