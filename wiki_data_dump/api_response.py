@@ -8,8 +8,8 @@ import re
 class File:
     size: int
     url: str
-    md5: str
-    sha1: str
+    md5: str = None
+    sha1: str = None
 
 
 @dataclass

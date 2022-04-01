@@ -92,7 +92,8 @@ def _download_and_decompress(from_location: str,
             p_bar.update(intermediate_buffer.write(chunk))
             hex_d.update(chunk)
 
-        assert sha1 == hex_d.hexdigest(), "Download verification failed."
+        if sha1:
+            assert sha1 == hex_d.hexdigest(), "Download verification failed."
 
         p_bar.close()
 
