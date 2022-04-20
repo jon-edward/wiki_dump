@@ -75,9 +75,11 @@ The process is simple and readable:
 2. Filter the files to only contain those that you need.
 3. Download the files concurrently (or in parallel).
 
+For more direction on how to use this library, see [`tests.py`](tests.py) or 
+examples in [`examples`](examples).
+
 ## Next steps
 
-* Bars showing appropriate progress over multiple threads.
 * Automatic detection of which mirror has the fastest download speed at any 
 given time.
 * Caching that updates only when a resource is out of date, instead of just when
