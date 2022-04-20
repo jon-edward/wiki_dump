@@ -69,6 +69,15 @@ class WikiDump:
         if clear_expired_caches:
             wiki_data_dump.cache.clear_expired_caches(cache_dir)
 
+    @property
+    def mirror(self):
+        return self._mirror
+
+    @mirror.setter
+    def mirror(self, other: MirrorType):
+        self._mirror = other.value
+        self._update_response()
+
     def _update_response(self) -> None:
         """Used internally for getting cached json response contents, and caching new index files as needed."""
         self._cached_wikis = {}
