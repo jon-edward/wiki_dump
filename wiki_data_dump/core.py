@@ -9,7 +9,7 @@ from typing import Union, List, Tuple, overload, Dict
 import json
 from requests import Session
 
-from wiki_data_dump.mirrors import Mirror, _name_to_mirror, MirrorType
+from wiki_data_dump.mirrors import _Mirror, MirrorType
 import wiki_data_dump.cache
 import wiki_data_dump.api_response
 import wiki_data_dump.download
@@ -19,7 +19,7 @@ ProgressHookType = wiki_data_dump.download.ProgressHookType
 CompletionHookType = wiki_data_dump.download.CompletionHookType
 
 
-def _get_index_contents(mirror: Mirror, sess: Session) -> str:
+def _get_index_contents(mirror: _Mirror, sess: Session) -> str:
     """Returns index.json contents from mirror."""
 
     res = sess.get(mirror.index_location, stream=True, timeout=5.0)
@@ -43,7 +43,7 @@ class WikiDump:
     """Primary class of wiki_data_dump, holds logic for getting items from the index of the mirror's site and provides
     utilities for downloading linked files."""
 
-    mirror: Mirror
+    mirror: _Mirror
     session: Session
     response_json: dict
     cache_dir: str
@@ -179,7 +179,3 @@ class WikiDump:
                 for file in job.files.keys():
                     yield wiki_name, job_name, file
 
-
-def all_mirrors() -> List[Mirror]:
-    """Returns a list of all available mirrors."""
-    return [c for c in _name_to_mirror.values()]
