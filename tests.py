@@ -54,7 +54,7 @@ class TestWikiDumpWrapper(TestCase):
     def test_successful_get_file_pattern(self):
         import re
 
-        self.assertTrue(self.wiki.get_file("enwiki", "wbcentityusagetable", re.compile("wbc_entity_usage\.sql\.gz$")))
+        self.assertTrue(self.wiki.get_file("enwiki", "wbcentityusagetable", re.compile(r"wbc_entity_usage\.sql\.gz$")))
 
     def test_unsuccessful_get_file_pattern(self):
         import re
