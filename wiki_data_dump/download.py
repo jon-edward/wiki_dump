@@ -33,6 +33,7 @@ class _FileWrapper(io.IOBase):
 
 
 class _CompletionManager:
+    """Accepts a hook which is passed arguments similar to those passed to a context manager."""
     hook: CompletionHookType
 
     def __init__(self, hook: CompletionHookType):
@@ -78,6 +79,7 @@ def _download(
         progress_hook: ProgressHookType,
         completion_hook: CompletionHookType,
         sha1: str):
+    """Download file from response and verify sha1 sum if available."""
 
     hex_d = hashlib.sha1()
 
@@ -150,7 +152,6 @@ def completion_hook_noop(exc_type: Optional[type],
     """
 
 
-
 def base_download(
         from_location: str,
         to_location: Optional[str],
@@ -163,6 +164,7 @@ def base_download(
         decompress_progress_hook: ProgressHookType,
         decompress_completion_hook: CompletionHookType,
         chunk_size: int = 1024):
+    """Contains core logic for path resolution, compression type resolution, hook resolution, and threading."""
 
     to_location = to_location if to_location is not None else _automatic_resolve_to_location(
         from_location, decompress
