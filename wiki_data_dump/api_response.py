@@ -33,7 +33,7 @@ class Job:
         for n in to_delete:
             del self.files[n]
 
-    def get_file(self, key: Union[str, re.Pattern]) -> Optional[File]:
+    def get_file(self, key: Union[str, re.Pattern]) -> File:
         """Query file names by the first name that contains a match
         for a regex Pattern or get the exact matching file name."""
 
@@ -41,11 +41,9 @@ class Job:
             return self.files[key]
         try:
             name = next(_k for _k in self.files.keys() if key.search(_k))
-            if not name:
-                raise KeyError(f"{key}")
             return self.files[name]
         except StopIteration:
-            return None
+            raise KeyError(f"{key}")
 
     def get_files(self, re_key: re.Pattern) -> List[File]:
         """Queries file names to find all files that contain a match for the supplied re_key."""
