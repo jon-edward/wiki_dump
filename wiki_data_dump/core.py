@@ -9,7 +9,7 @@ from typing import Union, List, Tuple, overload, Dict
 import json
 from requests import Session
 
-from wiki_data_dump.mirrors import Mirror, _name_to_mirror
+from wiki_data_dump.mirrors import Mirror, _name_to_mirror, MirrorType
 import wiki_data_dump.cache
 import wiki_data_dump.api_response
 import wiki_data_dump.download
@@ -46,17 +46,17 @@ class WikiDump:
     mirror: Mirror
     session: Session
     response_json: dict
+    cache_dir: str
     _cached_wikis: Dict[str, wiki_data_dump.api_response.Wiki]
 
     def __init__(self,
-                 mirror: Union[str, Mirror] = "wikimedia",
+                 mirror: MirrorType = MirrorType.WIKIMEDIA,
                  session: Session = None,
                  clear_expired_caches: bool = True,
                  cache_dir: str = None):
 
-        if isinstance(mirror, str):
-            mirror = _name_to_mirror[mirror]
-        self._mirror = mirror
+        self._mirror = mirror.value
+        self.cache_dir = cache_dir
 
         if session is None:
             session = Session()
@@ -72,7 +72,7 @@ class WikiDump:
     def _update_response(self) -> None:
         """Used internally for getting cached json response contents, and caching new index files as needed."""
         self._cached_wikis = {}
-        _cache = wiki_data_dump.cache.get_cache(self.mirror)
+        _cache = wiki_data_dump.cache.get_cache(self.mirror, self.cache_dir)
 
         if _cache.content:
             content = _cache.content
@@ -82,17 +82,6 @@ class WikiDump:
                 f_buffer.write(content)
 
         self._raw_response_json: dict = json.loads(content)
-
-    @property
-    def mirror(self) -> Mirror:
-        """Returns the mirror instance the WikiDump is currently using."""
-        return self._mirror
-
-    @mirror.setter
-    def mirror(self, val: Mirror):
-        """Sets the mirror instance, and handles getting the appropriate index response."""
-        self._mirror = val
-        self._update_response()
 
     @property
     def response_json(self) -> dict:
