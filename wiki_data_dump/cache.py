@@ -61,14 +61,17 @@ def _get_today() -> str:
     return datetime.date.today().strftime("%Y%m%d")
 
 
-def get_cache(mirror: Mirror) -> CacheResult:
+def get_cache(mirror: Mirror, cache_dir: Optional[str]) -> CacheResult:
     """Gets cached mirror index file, and creates one if none exists.
     Cached filenames are in the format './_caches/[mirror_name]__[YYYMMDD of creation].wiki_dump_cache'"""
     today = _get_today()
     filename = f"{_normalize_name(mirror.name)}__{today}{CACHE_EXTENSION}"
-    path = os.path.join(CACHE_LOCATION, filename)
 
-    assert os.path.normpath(path).startswith(CACHE_LOCATION)
+    cache_dir = cache_dir if cache_dir else CACHE_LOCATION
+
+    path = os.path.join(cache_dir, filename)
+
+    assert os.path.normpath(path).startswith(cache_dir)
     #  Make sure mirror name does not move filename out of cache dir.
 
     if os.path.exists(path):
@@ -83,11 +86,14 @@ def get_cache(mirror: Mirror) -> CacheResult:
     return CacheResult(path, content=None)
 
 
-def clear_expired_caches() -> List[str]:
+def clear_expired_caches(cache_dir: Optional[str]) -> List[str]:
     """Returns a list of names of cache files that were removed because the date created has passed."""
 
     removed: List[str] = []
-    for name in os.listdir(CACHE_LOCATION):
+
+    cache_dir = cache_dir if cache_dir else CACHE_LOCATION
+
+    for name in os.listdir(cache_dir):
         without_extension = _extension_match.sub("", name)
         if without_extension != name:
             #  Contains cache extension.
@@ -99,20 +105,22 @@ def clear_expired_caches() -> List[str]:
                 #  If invalid date or no name/date, do not delete file.
                 continue
             if _date != _get_today():
-                os.remove(os.path.join(CACHE_LOCATION, name))
+                os.remove(os.path.join(cache_dir, name))
                 removed.append(name)
     logging.info(f"Removed files in cache: {removed}")
     return removed
 
 
-def force_clear_caches() -> List[str]:
+def force_clear_caches(cache_dir: Optional[str] = None) -> List[str]:
     """Returns list of names of removed files in cache."""
+
+    cache_dir = cache_dir if cache_dir else CACHE_LOCATION
 
     logging.warning("Removing all cache files from cache.")
     removed = []
-    for f in os.listdir(CACHE_LOCATION):
+    for f in os.listdir(cache_dir):
         if f.endswith(CACHE_EXTENSION):
             removed.append(f)
-            os.remove(os.path.join(CACHE_LOCATION, f))
+            os.remove(os.path.join(cache_dir, f))
     logging.info(f"Removed files in cache: {removed}")
     return removed

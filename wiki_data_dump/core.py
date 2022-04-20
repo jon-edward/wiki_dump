@@ -7,7 +7,6 @@ import tempfile
 from typing import Union, List, Tuple, overload, Dict
 
 import json
-import tqdm as tqdm
 from requests import Session
 
 from wiki_data_dump.mirrors import Mirror, _name_to_mirror
@@ -16,19 +15,14 @@ import wiki_data_dump.api_response
 import wiki_data_dump.download
 
 
+ProgressHookType = wiki_data_dump.download.ProgressHookType
+CompletionHookType = wiki_data_dump.download.CompletionHookType
+
+
 def _get_index_contents(mirror: Mirror, sess: Session) -> str:
     """Returns index.json contents from mirror."""
 
     res = sess.get(mirror.index_location, stream=True, timeout=5.0)
-    total = int(res.headers['content-length'])
-
-    p_bar = tqdm.tqdm(
-        desc="Downloading index file",
-        total=total,
-        unit="B",
-        unit_scale=True,
-        unit_divisor=1024
-    )
 
     t_file = tempfile.TemporaryFile()
 
@@ -36,9 +30,9 @@ def _get_index_contents(mirror: Mirror, sess: Session) -> str:
 
     chunk_size = 1024
 
-    with p_bar, t_file:
+    with t_file:
         for b in res.iter_content(chunk_size):
-            p_bar.update(t_file.write(b))
+            t_file.write(b)
         t_file.seek(0)
         content = t_file.read().decode()
 
@@ -57,7 +51,8 @@ class WikiDump:
     def __init__(self,
                  mirror: Union[str, Mirror] = "wikimedia",
                  session: Session = None,
-                 clear_expired_caches: bool = True):
+                 clear_expired_caches: bool = True,
+                 cache_dir: str = None):
 
         if isinstance(mirror, str):
             mirror = _name_to_mirror[mirror]
@@ -72,7 +67,7 @@ class WikiDump:
         self._update_response()
 
         if clear_expired_caches:
-            wiki_data_dump.cache.clear_expired_caches()
+            wiki_data_dump.cache.clear_expired_caches(cache_dir)
 
     def _update_response(self) -> None:
         """Used internally for getting cached json response contents, and caching new index files as needed."""
@@ -159,7 +154,11 @@ class WikiDump:
     def download(self,
                  file: wiki_data_dump.api_response.File,
                  destination: str = None,
-                 decompress: bool = True) -> threading.Thread:
+                 decompress: bool = True,
+                 download_progress_hook: ProgressHookType = None,
+                 download_completion_hook: CompletionHookType = None,
+                 decompress_progress_hook: ProgressHookType = None,
+                 decompress_completion_hook: CompletionHookType = None) -> threading.Thread:
         """Downloads a File with an optional supplied destination - if no destination is supplied then it will be
          assigned based on the end component of the originating url. Also includes decompression based on file suffix,
          which can be turned off with decompress.
@@ -172,7 +171,11 @@ class WikiDump:
             sha1=file.sha1,
             size=file.size,
             decompress=decompress,
-            session=self.session
+            session=self.session,
+            download_progress_hook=download_progress_hook,
+            download_completion_hook=download_completion_hook,
+            decompress_progress_hook=decompress_progress_hook,
+            decompress_completion_hook=decompress_completion_hook
         )
 
     def iter_files(self) -> Tuple[str, str, str]:
