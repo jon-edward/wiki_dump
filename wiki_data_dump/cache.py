@@ -71,7 +71,8 @@ def get_cache(mirror: _Mirror, cache_dir: Optional[str]) -> CacheResult:
 
     path = os.path.join(cache_dir, filename)
 
-    assert os.path.normpath(path).startswith(cache_dir)
+    tail, _ = os.path.split(os.path.abspath(path))
+    assert tail == os.path.abspath(cache_dir)
     #  Make sure mirror name does not move filename out of cache dir.
 
     if os.path.exists(path):
