@@ -3,27 +3,17 @@ import functools
 import gzip
 import hashlib
 import io
-import os.path
 import re
 from tempfile import NamedTemporaryFile
 import threading
-from typing import Optional
+from types import TracebackType
+from typing import Optional, Callable
 
 import requests
-import tqdm
 
 
-def _file_process_p_bar(message: str, total: int):
-    """Creates a tqdm progress bar for working on system memory with standard unit scaling."""
-
-    p_bar = tqdm.tqdm(
-        desc=message,
-        total=total,
-        unit="B",
-        unit_scale=True,
-        unit_divisor=1024
-    )
-    return p_bar
+ProgressHookType = Callable[[int, int], None]
+CompletionHookType = Callable[[Optional[type], Optional[Exception], Optional[TracebackType]], None]
 
 
 class _FileWrapper(io.IOBase):
@@ -31,28 +21,40 @@ class _FileWrapper(io.IOBase):
 
     def __init__(self, source: io.IOBase):
         self.source: io.IOBase = source
-        self.progress = 0
+        self.delta = 0
 
     def read(self, n: int = None):
         if n:
             _content = self.source.read(n)
         else:
             _content = self.source.read()
-        self.progress += len(_content)
+        self.delta = len(_content)
         return _content
+
+
+class _CompletionManager:
+    hook: CompletionHookType
+
+    def __init__(self, hook: CompletionHookType):
+        self.hook = hook
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return self.hook(exc_type, exc_val, exc_tb)
 
 
 def _decompress(
         from_file_wrapper: _FileWrapper,
         to_file_path: str,
         compression_type: str,
+        progress_hook: ProgressHookType,
+        completion_hook: CompletionHookType,
         size: int):
     """Decompresses file contained in a _FileWrapper."""
 
     assert compression_type in ('bz2', 'gz', None)
-
-    p_bar = _file_process_p_bar(f"{'Decompressing' if compression_type is not None else 'Writing'} to "
-                                f"{os.path.relpath(to_file_path)}", size)
 
     transfer_chunk_size = 1024*10
 
@@ -62,14 +64,30 @@ def _decompress(
         None: lambda: from_file_wrapper
     }[compression_type]()
 
-    previous = 0
-
-    with transfer_wrapper, open(to_file_path, "wb") as to_file_obj, p_bar:
+    with transfer_wrapper, open(to_file_path, "wb") as to_file_obj, _CompletionManager(completion_hook):
         while content := transfer_wrapper.read(transfer_chunk_size):
-            delta = from_file_wrapper.progress - previous
-            p_bar.update(delta)
             to_file_obj.write(content)
-            previous = from_file_wrapper.progress
+            progress_hook(from_file_wrapper.delta, size)
+
+
+def _download(
+        response: requests.Response,
+        intermediate_buffer: NamedTemporaryFile,
+        chunk_size: int,
+        size: int,
+        progress_hook: ProgressHookType,
+        completion_hook: CompletionHookType,
+        sha1: str):
+
+    hex_d = hashlib.sha1()
+
+    with _CompletionManager(completion_hook):
+        for chunk in response.iter_content(chunk_size=chunk_size):
+            progress_hook(intermediate_buffer.write(chunk), size)
+            hex_d.update(chunk)
+
+    if sha1:
+        assert sha1 == hex_d.hexdigest(), "Download verification failed."
 
 
 def _download_and_decompress(from_location: str,
@@ -78,28 +96,23 @@ def _download_and_decompress(from_location: str,
                              session: requests.Session,
                              sha1: str,
                              compression_type: str,
+                             download_progress_hook: ProgressHookType,
+                             download_completion_hook: CompletionHookType,
+                             decompress_progress_hook: ProgressHookType,
+                             decompress_completion_hook: CompletionHookType,
                              chunk_size: int = 1024):
     """Downloads file from source, then decompresses it by the protocol provided."""
 
     response = session.get(from_location, stream=True)
     response.raise_for_status()
-    hex_d = hashlib.sha1()
 
-    with NamedTemporaryFile() as intermediate_buffer, \
-            _file_process_p_bar(f"Downloading from {from_location}", size) as p_bar:
-
-        for chunk in response.iter_content(chunk_size=chunk_size):
-            p_bar.update(intermediate_buffer.write(chunk))
-            hex_d.update(chunk)
-
-        if sha1:
-            assert sha1 == hex_d.hexdigest(), "Download verification failed."
-
-        p_bar.close()
+    with NamedTemporaryFile() as intermediate_buffer:
+        _download(response, intermediate_buffer,
+                  chunk_size, size,
+                  download_progress_hook, download_completion_hook,
+                  sha1)
 
         intermediate_buffer.seek(0)
-
-        transfer_file: io.IOBase
 
         wrapper = _FileWrapper(intermediate_buffer)
 
@@ -107,6 +120,8 @@ def _download_and_decompress(from_location: str,
             wrapper,
             to_location,
             compression_type,
+            decompress_progress_hook,
+            decompress_completion_hook,
             size
         )
 
@@ -121,6 +136,21 @@ def _automatic_resolve_to_location(_from_location: str, _will_decompress: bool) 
     return last_term
 
 
+def progress_hook_noop(delta: int, total: int):
+    """
+    Does nothing, but takes the arguments that would otherwise be passed to a progress hook.
+    """
+
+
+def completion_hook_noop(exc_type: Optional[type],
+                         exc_val: Optional[Exception],
+                         exc_tb: Optional[TracebackType]):
+    """
+    Does nothing, but takes the arguments that would otherwise be passed to a completion hook.
+    """
+
+
+
 def base_download(
         from_location: str,
         to_location: Optional[str],
@@ -128,9 +158,11 @@ def base_download(
         session: requests.Session,
         sha1: str,
         decompress: bool,
+        download_progress_hook: ProgressHookType,
+        download_completion_hook: CompletionHookType,
+        decompress_progress_hook: ProgressHookType,
+        decompress_completion_hook: CompletionHookType,
         chunk_size: int = 1024):
-    """Used internally for creating a Thread that downloads from a specified url,
-    and running the download/decompression routine."""
 
     to_location = to_location if to_location is not None else _automatic_resolve_to_location(
         from_location, decompress
@@ -145,14 +177,26 @@ def base_download(
     else:
         compression_type = None
 
+    def progress_noop_if_none(x) -> ProgressHookType:
+        return progress_hook_noop if x is None else x
+
+    def completion_noop_if_none(x) -> CompletionHookType:
+        return completion_hook_noop if x is None else x
+
     kw = {
         "from_location": from_location,
         "to_location": to_location,
         "size": size,
         "session": session,
+
         "sha1": sha1,
         "chunk_size": chunk_size,
-        "compression_type": compression_type
+        "compression_type": compression_type,
+
+        "download_progress_hook": progress_noop_if_none(download_progress_hook),
+        "download_completion_hook": completion_noop_if_none(download_completion_hook),
+        "decompress_progress_hook": progress_noop_if_none(decompress_progress_hook),
+        "decompress_completion_hook": completion_noop_if_none(decompress_completion_hook),
     }
 
     func = functools.partial(_download_and_decompress, **kw)
