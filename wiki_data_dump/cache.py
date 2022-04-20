@@ -5,7 +5,7 @@ import re
 from typing import Optional, NamedTuple, List
 import unicodedata
 
-from wiki_data_dump.mirrors import Mirror
+from wiki_data_dump.mirrors import _Mirror
 
 
 CACHE_LOCATION = os.path.join(os.path.dirname(__file__), "_caches")
@@ -61,7 +61,7 @@ def _get_today() -> str:
     return datetime.date.today().strftime("%Y%m%d")
 
 
-def get_cache(mirror: Mirror, cache_dir: Optional[str]) -> CacheResult:
+def get_cache(mirror: _Mirror, cache_dir: Optional[str]) -> CacheResult:
     """Gets cached mirror index file, and creates one if none exists.
     Cached filenames are in the format './_caches/[mirror_name]__[YYYMMDD of creation].wiki_dump_cache'"""
     today = _get_today()
