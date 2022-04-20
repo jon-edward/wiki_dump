@@ -9,6 +9,8 @@ class _Mirror(NamedTuple):
 
 
 class MirrorType(enum.Enum):
+    """Contains valid wiki mirror destinations."""
+
     WIKIMEDIA = _Mirror(
         "Wikimedia",
         "https://dumps.wikimedia.org/index.json"
