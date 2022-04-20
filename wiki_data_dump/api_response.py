@@ -57,4 +57,5 @@ class Wiki:
 
     def __post_init__(self):
         for name, job in self.jobs.items():
-            self.jobs[name] = Job(**copy.deepcopy(job))
+            if not isinstance(job, Job):
+                self.jobs[name] = Job(**copy.deepcopy(job))
