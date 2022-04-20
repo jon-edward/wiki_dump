@@ -91,6 +91,7 @@ class WikiDump:
         if not self.use_cache:
             c = _get_index_contents(self.mirror, self.session)
             self._raw_response_json = json.loads(c)
+            return
 
         _cache = wiki_data_dump.cache.get_cache(self.mirror, self.cache_dir)
 
