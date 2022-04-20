@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="wiki_data_dump",
-    version="0.0.4",
+    version="0.1.0",
     author="jon-edward",
     author_email="arithmatlic@gmail.com",
     description="A package for traversing and downloading files from Wiki Data Dump mirrors.",
@@ -19,7 +19,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        "requests", "tqdm"
+        "requests",
     ],
     packages=setuptools.find_packages(include=["wiki_data_dump"]),
     python_requires=">=3.8",
