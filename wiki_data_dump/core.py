@@ -120,7 +120,7 @@ class WikiDump:
             return self.get_file(*item)
         raise TypeError("Argument must be a string, or a tuple containing <= 3 strings.")
 
-    def get_wiki(self, wiki_name: str, cache: bool = True) -> wiki_data_dump.api_response.Wiki:
+    def get_wiki(self, wiki_name: str, *, cache: bool = True) -> wiki_data_dump.api_response.Wiki:
         """Get Wiki instance associated with wiki_name. Optionally caches result."""
         try:
             return self._cached_wikis[wiki_name]
@@ -132,13 +132,13 @@ class WikiDump:
         return self._cached_wikis[wiki_name]
 
     def get_job(self, wiki_name: str,
-                job_name: str, cache: bool = True) -> wiki_data_dump.api_response.Job:
+                job_name: str, *, cache: bool = True) -> wiki_data_dump.api_response.Job:
         """Get Job instance associated with wiki_name and job_name. Optionally caches result."""
         wiki = self.get_wiki(wiki_name, cache=cache)
         return wiki.jobs[job_name]
 
     def get_file(self, wiki_name,
-                 job_name, file_identifier: Union[str, re.Pattern],
+                 job_name, file_identifier: Union[str, re.Pattern], *,
                  cache: bool = True) -> wiki_data_dump.api_response.File:
         """Get File instance associated with wiki_name, job_name, and file_identifier. Optionally caches result."""
         job = self.get_job(wiki_name, job_name, cache=cache)
