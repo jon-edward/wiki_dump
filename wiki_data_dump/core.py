@@ -47,16 +47,22 @@ class WikiDump:
     session: Session
     response_json: dict
     cache_dir: str
+    use_cache: bool
+    cache_index: bool
     _cached_wikis: Dict[str, wiki_data_dump.api_response.Wiki]
 
     def __init__(self,
                  mirror: MirrorType = MirrorType.WIKIMEDIA,
                  session: Session = None,
                  clear_expired_caches: bool = True,
-                 cache_dir: str = None):
+                 cache_dir: str = None,
+                 use_cache: bool = True,
+                 cache_index: bool = True):
 
         self._mirror = mirror.value
         self.cache_dir = cache_dir
+        self.cache_index = cache_index
+        self.use_cache = use_cache
 
         if session is None:
             session = Session()
@@ -81,14 +87,20 @@ class WikiDump:
     def _update_response(self) -> None:
         """Used internally for getting cached json response contents, and caching new index files as needed."""
         self._cached_wikis = {}
+
+        if not self.use_cache:
+            c = _get_index_contents(self.mirror, self.session)
+            return json.loads(c)
+
         _cache = wiki_data_dump.cache.get_cache(self.mirror, self.cache_dir)
 
         if _cache.content:
             content = _cache.content
         else:
             content = _get_index_contents(self.mirror, self.session)
-            with open(_cache.path, 'w') as f_buffer:
-                f_buffer.write(content)
+            if self.cache_index:
+                with open(_cache.path, 'w') as f_buffer:
+                    f_buffer.write(content)
 
         self._raw_response_json: dict = json.loads(content)
 
