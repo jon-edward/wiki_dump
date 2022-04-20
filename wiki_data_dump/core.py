@@ -4,7 +4,7 @@ import re
 import threading
 import urllib.parse
 import tempfile
-from typing import Union, List, Tuple, overload, Dict
+from typing import Union, Tuple, overload, Dict
 
 import json
 from requests import Session
@@ -77,10 +77,12 @@ class WikiDump:
 
     @property
     def mirror(self):
+        """The value contained within the MirrorType enum provided."""
         return self._mirror
 
     @mirror.setter
     def mirror(self, other: MirrorType):
+        """Changes mirror enum, and handles response update."""
         self._mirror = other.value
         self._update_response()
 
