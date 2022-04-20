@@ -41,6 +41,8 @@ class Job:
             return self.files[key]
         try:
             name = next(_k for _k in self.files.keys() if key.search(_k))
+            if not name:
+                raise KeyError(f"{key}")
             return self.files[name]
         except StopIteration:
             return None
