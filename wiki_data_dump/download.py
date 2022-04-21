@@ -19,7 +19,8 @@ CompletionHookType = Callable[
 
 
 class _FileWrapper(io.IOBase):
-    """Wraps a file for tracking how much of the file has been accessed. Used for tracking decompression."""
+    """Wraps a file for tracking how much of the file has been accessed.
+    Used for tracking decompression."""
 
     def __init__(self, source: io.IOBase):
         self.source: io.IOBase = source
@@ -152,16 +153,16 @@ def _automatic_resolve_to_location(_from_location: str, _will_decompress: bool) 
     return last_term
 
 
-def progress_hook_noop(delta: int, total: int):
+def progress_hook_noop(_delta: int, _total: int):
     """
     Does nothing, but takes the arguments that would otherwise be passed to a progress hook.
     """
 
 
 def completion_hook_noop(
-    exc_type: Optional[type],
-    exc_val: Optional[Exception],
-    exc_tb: Optional[TracebackType],
+    _exc_type: Optional[type],
+    _exc_val: Optional[Exception],
+    _exc_tb: Optional[TracebackType],
 ):
     """
     Does nothing, but takes the arguments that would otherwise be passed to a completion hook.
@@ -181,7 +182,8 @@ def base_download(
     decompress_completion_hook: CompletionHookType,
     chunk_size: int = 1024,
 ):
-    """Contains core logic for path resolution, compression type resolution, hook resolution, and threading."""
+    """Contains core logic for path resolution, compression type resolution,
+    shook resolution, and threading."""
 
     to_location = (
         to_location
@@ -204,7 +206,7 @@ def base_download(
     def completion_noop_if_none(x) -> CompletionHookType:
         return completion_hook_noop if x is None else x
 
-    kw = {
+    keywords = {
         "from_location": from_location,
         "to_location": to_location,
         "size": size,
@@ -220,7 +222,7 @@ def base_download(
         ),
     }
 
-    func = functools.partial(_download_and_decompress, **kw)
+    func = functools.partial(_download_and_decompress, **keywords)
 
     t = threading.Thread(target=func)
     t.start()
