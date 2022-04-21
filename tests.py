@@ -28,7 +28,7 @@ def new_wiki_dump(mock_get: MagicMock) -> WikiDump:
     """Get new WikiDump without caching."""
     mock_get.return_value = IterContentWrapper()
     #  Not using cache, and not writing to cache.
-    return WikiDump(use_cache=False, cache_index=False)
+    return WikiDump(use_cache=False, cache_index=False, clear_expired_caches=False)
 
 
 class TestWikiDumpWrapper(TestCase):
