@@ -32,8 +32,8 @@ def _get_index_contents(mirror: _Mirror, sess: Session) -> str:
     chunk_size = 1024
 
     with t_file:
-        for b in res.iter_content(chunk_size):
-            t_file.write(b)
+        for chunk in res.iter_content(chunk_size):
+            t_file.write(chunk)
         t_file.seek(0)
         content = t_file.read().decode()
 
@@ -41,8 +41,8 @@ def _get_index_contents(mirror: _Mirror, sess: Session) -> str:
 
 
 class WikiDump:
-    """Primary class of wiki_data_dump, holds logic for getting items from the index of the mirror's site and provides
-    utilities for downloading linked files."""
+    """Primary class of wiki_data_dump, holds logic for getting items from the index
+    of the mirror's site and provides utilities for downloading linked files."""
 
     mirror: _Mirror
     session: Session
@@ -70,7 +70,7 @@ class WikiDump:
         if session is None:
             session = Session()
             session.headers["User-Agent"] = (
-                "wiki_data_dump/0.0.4 " "(https://github.com/jon-edward/wiki_dump)"
+                "wiki_data_dump/0.0.4 (https://github.com/jon-edward/wiki_dump)"
             )
         self.session = session
 
@@ -91,12 +91,13 @@ class WikiDump:
         self._update_response()
 
     def _update_response(self) -> None:
-        """Used internally for getting cached json response contents, and caching new index files as needed."""
+        """Used internally for getting cached json response contents,
+        and caching new index files as needed."""
         self._cached_wikis = {}
 
         if not self.use_cache:
-            c = _get_index_contents(self.mirror, self.session)
-            self._raw_response_json = json.loads(c)
+            content = _get_index_contents(self.mirror, self.session)
+            self._raw_response_json = json.loads(content)
             return
 
         _cache = wiki_data_dump.cache.get_cache(self.mirror, self.cache_dir)
@@ -106,7 +107,7 @@ class WikiDump:
         else:
             content = _get_index_contents(self.mirror, self.session)
             if self.cache_index:
-                with open(_cache.path, "w") as f_buffer:
+                with open(_cache.path, "w", encoding="utf8") as f_buffer:
                     f_buffer.write(content)
 
         self._raw_response_json: dict = json.loads(content)
@@ -142,11 +143,11 @@ class WikiDump:
 
         if isinstance(item, str):
             return self.get_wiki(item)
-        elif len(item) == 1:
+        if len(item) == 1:
             return self.get_wiki(item[0])
-        elif len(item) == 2:
+        if len(item) == 2:
             return self.get_job(*item)
-        elif len(item) == 3:
+        if len(item) == 3:
             return self.get_file(*item)
         raise TypeError(
             "Argument must be a string, or a tuple containing <= 3 strings."
@@ -182,7 +183,8 @@ class WikiDump:
         *,
         cache: bool = True
     ) -> wiki_data_dump.api_response.File:
-        """Get File instance associated with wiki_name, job_name, and file_identifier. Optionally caches result."""
+        """Get File instance associated with wiki_name, job_name,
+        and file_identifier. Optionally caches result."""
         job = self.get_job(wiki_name, job_name, cache=cache)
         return job.get_file(file_identifier)
 
@@ -205,9 +207,10 @@ class WikiDump:
         decompress_progress_hook: ProgressHookType = None,
         decompress_completion_hook: CompletionHookType = None,
     ) -> threading.Thread:
-        """Downloads a File with an optional supplied destination - if no destination is supplied then it will be
-        assigned based on the end component of the originating url. Also includes decompression based on file suffix,
-        which can be turned off with decompress.
+        """Downloads a File with an optional supplied destination - if
+        no destination is supplied then it will be assigned based on the
+        end component of the originating url. Also includes decompression
+        based on file suffix, which can be turned off with decompress.
 
         Returns the Thread instance that the download is running on."""
 
@@ -225,7 +228,8 @@ class WikiDump:
         )
 
     def iter_files(self) -> Tuple[str, str, str]:
-        """Returns an iterator that contains the file path components (wiki_name, job_name, file_name) for every file
+        """Returns an iterator that contains the file path components
+        (wiki_name, job_name, file_name) for every file
         in the raw json response. Does not cache accessed wikis."""
 
         for wiki_name in self.wikis:

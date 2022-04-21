@@ -25,12 +25,14 @@ class _FileWrapper(io.IOBase):
     Used for tracking decompression."""
 
     def __init__(self, source: io.IOBase):
+        super().__init__()
         self.source: io.IOBase = source
         self.delta = 0
 
-    def read(self, n: int = None):
-        if n:
-            _content = self.source.read(n)
+    def read(self, n_characters: int = None):
+        """Mirrors io.IOBase.read for readable files."""
+        if n_characters:
+            _content = self.source.read(n_characters)
         else:
             _content = self.source.read()
         self.delta = len(_content)
@@ -202,11 +204,11 @@ def base_download(
     else:
         compression_type = None
 
-    def progress_noop_if_none(x) -> ProgressHookType:
-        return progress_hook_noop if x is None else x
+    def progress_noop_if_none(hook) -> ProgressHookType:
+        return progress_hook_noop if hook is None else hook
 
-    def completion_noop_if_none(x) -> CompletionHookType:
-        return completion_hook_noop if x is None else x
+    def completion_noop_if_none(hook) -> CompletionHookType:
+        return completion_hook_noop if hook is None else hook
 
     keywords = {
         "from_location": from_location,
@@ -219,13 +221,11 @@ def base_download(
         "download_progress_hook": progress_noop_if_none(download_progress_hook),
         "download_completion_hook": completion_noop_if_none(download_completion_hook),
         "decompress_progress_hook": progress_noop_if_none(decompress_progress_hook),
-        "decompress_completion_hook": completion_noop_if_none(
-            decompress_completion_hook
-        ),
+        "decompress_completion_hook": completion_noop_if_none(decompress_completion_hook),
     }
 
     func = functools.partial(_download_and_decompress, **keywords)
 
-    t = threading.Thread(target=func)
-    t.start()
-    return t
+    thread = threading.Thread(target=func)
+    thread.start()
+    return thread
