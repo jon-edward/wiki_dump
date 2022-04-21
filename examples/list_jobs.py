@@ -7,7 +7,7 @@ def jobs_for_wiki(wiki_object: Wiki):
 
 
 # pylint: disable=C0103
-if __name__ == '__main__':
+if __name__ == "__main__":
     wiki_dump = WikiDump()
 
     for wiki in wiki_dump.wikis:

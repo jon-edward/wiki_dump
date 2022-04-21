@@ -7,11 +7,12 @@ from wiki_data_dump import WikiDump
 
 class IterContentWrapper:
     """Used to mock requests.Response"""
+
     @staticmethod
     def iter_content(chunk_size: int):
         """Mocks requests.Response.iter_content"""
         #  Returns an iterator for test_cache, which only contains 'enwiki' branch of index.
-        with open("test_data/test_cache.json", 'rb') as f:
+        with open("test_data/test_cache.json", "rb") as f:
             while chunk := f.read(chunk_size):
                 yield chunk
 
@@ -31,6 +32,7 @@ def new_wiki_dump(mock_get: MagicMock) -> WikiDump:
 
 class TestWikiDumpWrapper(TestCase):
     """Tests API operations in WikiDump wrapper class."""
+
     wiki: WikiDump
 
     def setUp(self) -> None:
@@ -55,24 +57,49 @@ class TestWikiDumpWrapper(TestCase):
 
     def test_unsuccessful_get_job(self):
         """Tests an unsuccessful result from getting a Job by name."""
-        self.assertRaises(KeyError, lambda: self.wiki.get_job("enwiki", "[invalid job name]"))
+        self.assertRaises(
+            KeyError, lambda: self.wiki.get_job("enwiki", "[invalid job name]")
+        )
 
     def test_successful_get_file_absolute(self):
         """Tests a successful result from getting a File by absolute name."""
-        self.assertTrue(self.wiki.get_file("enwiki", "wbcentityusagetable", "enwiki-20220420-wbc_entity_usage.sql.gz"))
+        self.assertTrue(
+            self.wiki.get_file(
+                "enwiki",
+                "wbcentityusagetable",
+                "enwiki-20220420-wbc_entity_usage.sql.gz",
+            )
+        )
 
     def test_unsuccessful_get_file_absolute(self):
         """Tests an unsuccessful result from getting a File by absolute name."""
-        self.assertRaises(KeyError, lambda: self.wiki.get_file("enwiki", "wbcentityusagetable", "[invalid file]"))
+        self.assertRaises(
+            KeyError,
+            lambda: self.wiki.get_file(
+                "enwiki", "wbcentityusagetable", "[invalid file]"
+            ),
+        )
 
     def test_successful_get_file_pattern(self):
         """Tests a successful result from getting a File by regex pattern, matching first successful case."""
-        self.assertTrue(self.wiki.get_file("enwiki", "wbcentityusagetable", re.compile(r"wbc_entity_usage\.sql\.gz$")))
+        self.assertTrue(
+            self.wiki.get_file(
+                "enwiki",
+                "wbcentityusagetable",
+                re.compile(r"wbc_entity_usage\.sql\.gz$"),
+            )
+        )
 
     def test_unsuccessful_get_file_pattern(self):
         """Tests an unsuccessful result from getting a File by regex patterm."""
-        self.assertRaises(KeyError, lambda: self.wiki.get_file("enwiki", "wbcentityusagetable",
-                                                               re.compile("this is an invalid file pattern")))
+        self.assertRaises(
+            KeyError,
+            lambda: self.wiki.get_file(
+                "enwiki",
+                "wbcentityusagetable",
+                re.compile("this is an invalid file pattern"),
+            ),
+        )
 
     def test_iter_files(self):
         """Tests iterating over all files in a data dump, using known file count to verify."""
@@ -89,19 +116,39 @@ class TestWikiDumpWrapper(TestCase):
 
     def test_get_file_by_getitem_absolute(self):
         """Test getting a File by means of __getitem__, using absolute path."""
-        self.assertTrue(self.wiki["enwiki", "wbcentityusagetable", "enwiki-20220420-wbc_entity_usage.sql.gz"])
+        self.assertTrue(
+            self.wiki[
+                "enwiki",
+                "wbcentityusagetable",
+                "enwiki-20220420-wbc_entity_usage.sql.gz",
+            ]
+        )
 
     def test_get_file_by_getitem_pattern(self):
         """Test getting a Wiki by means of __getitem__, using regex pattern."""
-        self.assertTrue(self.wiki["enwiki", "wbcentityusagetable", re.compile(r"wbc_entity_usage\.sql\.gz$")])
+        self.assertTrue(
+            self.wiki[
+                "enwiki",
+                "wbcentityusagetable",
+                re.compile(r"wbc_entity_usage\.sql\.gz$"),
+            ]
+        )
 
     def test_get_files_some(self):
         """Tests a non-empty result for getting all matching occurrences of a file by regex."""
-        self.assertTrue(self.wiki.get_job("enwiki", "wbcentityusagetable").get_files(re.compile(r"\.gz$")))
+        self.assertTrue(
+            self.wiki.get_job("enwiki", "wbcentityusagetable").get_files(
+                re.compile(r"\.gz$")
+            )
+        )
 
     def test_get_files_none(self):
         """Tests an empty result for getting all matching occurrences of a file by regex."""
-        self.assertFalse(self.wiki.get_job("enwiki", "wbcentityusagetable").get_files(re.compile(r"invalid file$")))
+        self.assertFalse(
+            self.wiki.get_job("enwiki", "wbcentityusagetable").get_files(
+                re.compile(r"invalid file$")
+            )
+        )
 
     def test_wiki(self):
         """Test getting all wiki names, test index only contains enwiki."""

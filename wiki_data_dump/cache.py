@@ -13,12 +13,27 @@ CACHE_EXTENSION = ".wiki_dump_cache"  # Identifies cache files in the cache dir.
 
 
 _reserved_characters = {
-    "#", "%", "&", "{",
-    "}", "<", ">", "*",
-    "?", "/", "$", "!",
-    "'", '"', ":", "@",
-    "+", "`", "|", "=",
-    "\\"
+    "#",
+    "%",
+    "&",
+    "{",
+    "}",
+    "<",
+    ">",
+    "*",
+    "?",
+    "/",
+    "$",
+    "!",
+    "'",
+    '"',
+    ":",
+    "@",
+    "+",
+    "`",
+    "|",
+    "=",
+    "\\",
 }  # Commonly prohibited or discouraged characters in filenames.
 
 
@@ -28,6 +43,7 @@ _extension_match = re.compile(rf"{CACHE_EXTENSION}$")
 
 class CacheResult(NamedTuple):
     """Contains the result of a cache request, with the path created/found and the content if file exists."""
+
     path: str
     content: Optional[str]
 
@@ -38,17 +54,17 @@ def _normalize_name(name: str) -> str:
 
     def map_chr(ch) -> str:
         if ch in _reserved_characters:
-            return ''
+            return ""
         elif ch == ".":
             #  Valid filename character,
             #  but will make extension
             #  checking more difficult.
-            return ''
+            return ""
         elif ch == " ":
-            return '_'
+            return "_"
         return ch
 
-    kd_form = unicodedata.normalize('NFKD', name)
+    kd_form = unicodedata.normalize("NFKD", name)
     name = "".join(map_chr(c) for c in kd_form if not unicodedata.combining(c))
     name = _dunder_match.sub("_", name).rstrip("_")
     assert name, "cached file name must normalize to a non-empty string"
@@ -76,14 +92,14 @@ def get_cache(mirror: _Mirror, cache_dir: Optional[str]) -> CacheResult:
     #  Make sure mirror name does not move filename out of cache dir.
 
     if os.path.exists(path):
-        with open(path, 'r') as f_buffer:
+        with open(path, "r") as f_buffer:
             content = f_buffer.read()
         return CacheResult(path, content if content else None)
 
     if not os.path.exists(CACHE_LOCATION):
         os.mkdir(CACHE_LOCATION)
 
-    open(path, 'w').close()  # Make file.
+    open(path, "w").close()  # Make file.
     return CacheResult(path, content=None)
 
 

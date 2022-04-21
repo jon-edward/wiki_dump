@@ -3,7 +3,7 @@ import re
 from wiki_data_dump import WikiDump
 
 # pylint: disable=C0103
-if __name__ == '__main__':
+if __name__ == "__main__":
     wiki = WikiDump()
 
     file = wiki["enwiki", "sitestable", re.compile(r"sites\.sql\.gz$")]
@@ -18,8 +18,11 @@ if __name__ == '__main__':
 
     #  Completion hooks follow the same signature as __exit__
 
-    download_thread = wiki.download(file, destination="sitestable.sql",
-                                    download_completion_hook=download_completion_hook,
-                                    decompress_completion_hook=decompress_completion_hook)
+    download_thread = wiki.download(
+        file,
+        destination="sitestable.sql",
+        download_completion_hook=download_completion_hook,
+        decompress_completion_hook=decompress_completion_hook,
+    )
     download_thread.join()
 # pylint: enable=C0103

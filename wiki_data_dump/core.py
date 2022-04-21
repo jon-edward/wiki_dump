@@ -1,4 +1,3 @@
-
 import copy
 import re
 import threading
@@ -51,13 +50,15 @@ class WikiDump:
     cache_index: bool
     _cached_wikis: Dict[str, wiki_data_dump.api_response.Wiki]
 
-    def __init__(self,
-                 mirror: MirrorType = MirrorType.WIKIMEDIA,
-                 session: Session = None,
-                 clear_expired_caches: bool = True,
-                 cache_dir: str = None,
-                 use_cache: bool = True,
-                 cache_index: bool = True):
+    def __init__(
+        self,
+        mirror: MirrorType = MirrorType.WIKIMEDIA,
+        session: Session = None,
+        clear_expired_caches: bool = True,
+        cache_dir: str = None,
+        use_cache: bool = True,
+        cache_index: bool = True,
+    ):
 
         self._mirror = mirror.value
         self.cache_dir = cache_dir
@@ -66,8 +67,9 @@ class WikiDump:
 
         if session is None:
             session = Session()
-            session.headers['User-Agent'] = "wiki_data_dump/0.0.4 " \
-                                            "(https://github.com/jon-edward/wiki_dump)"
+            session.headers["User-Agent"] = (
+                "wiki_data_dump/0.0.4 " "(https://github.com/jon-edward/wiki_dump)"
+            )
         self.session = session
 
         self._update_response()
@@ -102,7 +104,7 @@ class WikiDump:
         else:
             content = _get_index_contents(self.mirror, self.session)
             if self.cache_index:
-                with open(_cache.path, 'w') as f_buffer:
+                with open(_cache.path, "w") as f_buffer:
                     f_buffer.write(content)
 
         self._raw_response_json: dict = json.loads(content)
@@ -110,17 +112,28 @@ class WikiDump:
     @property
     def response_json(self) -> dict:
         """Contains the raw response from the index.json file on the mirror."""
-        return copy.deepcopy(self._raw_response_json)  # Internally, _raw_response_json should be used so copying
+        return copy.deepcopy(
+            self._raw_response_json
+        )  # Internally, _raw_response_json should be used so copying
         # isn't required
 
     @overload
-    def __getitem__(self, item: str) -> wiki_data_dump.api_response.Wiki: ...
+    def __getitem__(self, item: str) -> wiki_data_dump.api_response.Wiki:
+        ...
+
     @overload
-    def __getitem__(self, item: Tuple[str]) -> wiki_data_dump.api_response.Wiki: ...
+    def __getitem__(self, item: Tuple[str]) -> wiki_data_dump.api_response.Wiki:
+        ...
+
     @overload
-    def __getitem__(self, item: Tuple[str, str]) -> wiki_data_dump.api_response.Job: ...
+    def __getitem__(self, item: Tuple[str, str]) -> wiki_data_dump.api_response.Job:
+        ...
+
     @overload
-    def __getitem__(self, item: Tuple[str, str, Union[str, re.Pattern]]) -> wiki_data_dump.api_response.File: ...
+    def __getitem__(
+        self, item: Tuple[str, str, Union[str, re.Pattern]]
+    ) -> wiki_data_dump.api_response.File:
+        ...
 
     def __getitem__(self, item: Union[tuple, str]):
         """Convenience method for get_wiki, get_job, and get_file. Caches on every call."""
@@ -133,28 +146,40 @@ class WikiDump:
             return self.get_job(*item)
         elif len(item) == 3:
             return self.get_file(*item)
-        raise TypeError("Argument must be a string, or a tuple containing <= 3 strings.")
+        raise TypeError(
+            "Argument must be a string, or a tuple containing <= 3 strings."
+        )
 
-    def get_wiki(self, wiki_name: str, *, cache: bool = True) -> wiki_data_dump.api_response.Wiki:
+    def get_wiki(
+        self, wiki_name: str, *, cache: bool = True
+    ) -> wiki_data_dump.api_response.Wiki:
         """Get Wiki instance associated with wiki_name. Optionally caches result."""
         try:
             return self._cached_wikis[wiki_name]
         except KeyError:
-            result = wiki_data_dump.api_response.Wiki(**self._raw_response_json['wikis'][wiki_name])
+            result = wiki_data_dump.api_response.Wiki(
+                **self._raw_response_json["wikis"][wiki_name]
+            )
             if not cache:
                 return result
             self._cached_wikis[wiki_name] = result
         return self._cached_wikis[wiki_name]
 
-    def get_job(self, wiki_name: str,
-                job_name: str, *, cache: bool = True) -> wiki_data_dump.api_response.Job:
+    def get_job(
+        self, wiki_name: str, job_name: str, *, cache: bool = True
+    ) -> wiki_data_dump.api_response.Job:
         """Get Job instance associated with wiki_name and job_name. Optionally caches result."""
         wiki = self.get_wiki(wiki_name, cache=cache)
         return wiki.jobs[job_name]
 
-    def get_file(self, wiki_name,
-                 job_name, file_identifier: Union[str, re.Pattern], *,
-                 cache: bool = True) -> wiki_data_dump.api_response.File:
+    def get_file(
+        self,
+        wiki_name,
+        job_name,
+        file_identifier: Union[str, re.Pattern],
+        *,
+        cache: bool = True
+    ) -> wiki_data_dump.api_response.File:
         """Get File instance associated with wiki_name, job_name, and file_identifier. Optionally caches result."""
         job = self.get_job(wiki_name, job_name, cache=cache)
         return job.get_file(file_identifier)
@@ -162,21 +187,27 @@ class WikiDump:
     @property
     def wikis(self):
         """Get wiki names for every non-empty wiki in the raw response tree."""
-        return [k for k in self._raw_response_json['wikis'].keys() if self._raw_response_json['wikis'][k]]
+        return [
+            k
+            for k in self._raw_response_json["wikis"].keys()
+            if self._raw_response_json["wikis"][k]
+        ]
 
-    def download(self,
-                 file: wiki_data_dump.api_response.File,
-                 destination: str = None,
-                 decompress: bool = True,
-                 download_progress_hook: ProgressHookType = None,
-                 download_completion_hook: CompletionHookType = None,
-                 decompress_progress_hook: ProgressHookType = None,
-                 decompress_completion_hook: CompletionHookType = None) -> threading.Thread:
+    def download(
+        self,
+        file: wiki_data_dump.api_response.File,
+        destination: str = None,
+        decompress: bool = True,
+        download_progress_hook: ProgressHookType = None,
+        download_completion_hook: CompletionHookType = None,
+        decompress_progress_hook: ProgressHookType = None,
+        decompress_completion_hook: CompletionHookType = None,
+    ) -> threading.Thread:
         """Downloads a File with an optional supplied destination - if no destination is supplied then it will be
-         assigned based on the end component of the originating url. Also includes decompression based on file suffix,
-         which can be turned off with decompress.
+        assigned based on the end component of the originating url. Also includes decompression based on file suffix,
+        which can be turned off with decompress.
 
-         Returns the Thread instance that the download is running on."""
+        Returns the Thread instance that the download is running on."""
 
         return wiki_data_dump.download.base_download(
             from_location=urllib.parse.urljoin(self.mirror.index_location, file.url),
@@ -188,7 +219,7 @@ class WikiDump:
             download_progress_hook=download_progress_hook,
             download_completion_hook=download_completion_hook,
             decompress_progress_hook=decompress_progress_hook,
-            decompress_completion_hook=decompress_completion_hook
+            decompress_completion_hook=decompress_completion_hook,
         )
 
     def iter_files(self) -> Tuple[str, str, str]:
@@ -202,4 +233,3 @@ class WikiDump:
                     continue
                 for file in job.files.keys():
                     yield wiki_name, job_name, file
-
