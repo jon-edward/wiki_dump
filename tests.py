@@ -1,5 +1,6 @@
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
+import re
 
 from wiki_data_dump import WikiDump
 
@@ -66,14 +67,10 @@ class TestWikiDumpWrapper(TestCase):
 
     def test_successful_get_file_pattern(self):
         """Tests a successful result from getting a File by regex pattern, matching first successful case."""
-        import re
-
         self.assertTrue(self.wiki.get_file("enwiki", "wbcentityusagetable", re.compile(r"wbc_entity_usage\.sql\.gz$")))
 
     def test_unsuccessful_get_file_pattern(self):
         """Tests an unsuccessful result from getting a File by regex patterm."""
-        import re
-
         self.assertRaises(KeyError, lambda: self.wiki.get_file("enwiki", "wbcentityusagetable",
                                                                re.compile("this is an invalid file pattern")))
 
@@ -96,20 +93,14 @@ class TestWikiDumpWrapper(TestCase):
 
     def test_get_file_by_getitem_pattern(self):
         """Test getting a Wiki by means of __getitem__, using regex pattern."""
-        import re
-
         self.assertTrue(self.wiki["enwiki", "wbcentityusagetable", re.compile(r"wbc_entity_usage\.sql\.gz$")])
 
     def test_get_files_some(self):
         """Tests a non-empty result for getting all matching occurrences of a file by regex."""
-        import re
-
         self.assertTrue(self.wiki.get_job("enwiki", "wbcentityusagetable").get_files(re.compile(r"\.gz$")))
 
     def test_get_files_none(self):
         """Tests an empty result for getting all matching occurrences of a file by regex."""
-        import re
-
         self.assertFalse(self.wiki.get_job("enwiki", "wbcentityusagetable").get_files(re.compile(r"invalid file$")))
 
     def test_wiki(self):
