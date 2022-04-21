@@ -1,3 +1,5 @@
+"""wiki-data-dump tests."""
+
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 import re
@@ -12,14 +14,13 @@ class IterContentWrapper:
     def iter_content(chunk_size: int):
         """Mocks requests.Response.iter_content"""
         #  Returns an iterator for test_cache, which only contains 'enwiki' branch of index.
-        with open("test_data/test_cache.json", "rb") as f:
-            while chunk := f.read(chunk_size):
+        with open("test_data/test_cache.json", "rb") as f_buffer:
+            while chunk := f_buffer.read(chunk_size):
                 yield chunk
 
     @staticmethod
     def raise_for_status():
         """Noop for mocking requests.Response.raise_for_status"""
-        pass
 
 
 @patch("requests.Session.get", autospec=True)
@@ -37,7 +38,10 @@ class TestWikiDumpWrapper(TestCase):
 
     def setUp(self) -> None:
         """Create WikiDump without caching enabled."""
+        #  pylint: disable=no-value-for-parameter
+        #  Due to wrapper, new_wiki_dump does not take parameter.
         self.wiki = new_wiki_dump()
+        #  pylint: enable=no-value-for-parameter
 
     def test_wiki_dump_creation(self):
         """Tests simple WikiDump creation."""
@@ -81,7 +85,8 @@ class TestWikiDumpWrapper(TestCase):
         )
 
     def test_successful_get_file_pattern(self):
-        """Tests a successful result from getting a File by regex pattern, matching first successful case."""
+        """Tests a successful result from getting a File by regex pattern, matching
+        first successful case."""
         self.assertTrue(
             self.wiki.get_file(
                 "enwiki",
