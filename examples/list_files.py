@@ -1,3 +1,4 @@
+"""Example showing how to list all available files."""
 from wiki_data_dump import WikiDump
 
 # pylint: disable=C0103

@@ -1,3 +1,4 @@
+"""Example explaining how to download a file."""
 import re
 
 from wiki_data_dump import WikiDump
@@ -9,7 +10,8 @@ if __name__ == "__main__":
     file = wiki["enwiki", "sitestable", re.compile(r"sites\.sql\.gz$")]
 
     def download_completion_hook(_exc_type, _exc_val, _exc_tb):
-        """Called after file has finished downloading but not decompressing, mirrors __exit__ calls."""
+        """Called after file has finished downloading but not decompressing,
+        mirrors __exit__ calls."""
         print("completed sites table download")
 
     def decompress_completion_hook(_exc_type, _exc_val, _exc_tb):

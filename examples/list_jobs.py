@@ -1,3 +1,4 @@
+"""Example showing how to list all available jobs."""
 from wiki_data_dump import WikiDump, Wiki
 
 
