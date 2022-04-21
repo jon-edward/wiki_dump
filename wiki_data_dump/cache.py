@@ -104,7 +104,9 @@ def get_cache(mirror: _Mirror, cache_dir: Optional[str]) -> CacheResult:
     if not os.path.exists(CACHE_LOCATION):
         os.mkdir(CACHE_LOCATION)
 
-    open(path, "w", encoding="utf8").close()  # Make file.
+    with open(path, "w", encoding="utf8"):
+        pass  # Make file.
+
     return CacheResult(path, content=None)
 
 

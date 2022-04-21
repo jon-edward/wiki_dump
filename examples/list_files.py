@@ -6,7 +6,7 @@ def main():
     """Top-level main function."""
     wiki_dump = WikiDump()
 
-    for wiki_name, job_name, file_name in wiki_dump.iter_files():
+    for _wiki_name, _job_name, file_name in wiki_dump.iter_files():
         print(file_name)
 
 
