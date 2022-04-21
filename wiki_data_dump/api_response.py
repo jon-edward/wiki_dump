@@ -12,6 +12,7 @@ class File:
     Holds file size, sha1 sum, and url for downloading.
     Also contains md5, though this is unused.
     """
+
     size: int
     url: str
     md5: str = None
@@ -22,6 +23,7 @@ class File:
 class Job:
     """Holds job status, update time,
     and file mapping from name to File."""
+
     status: str
     updated: str
     files: Optional[dict] = None
@@ -57,12 +59,14 @@ class Job:
 
     def get_files(self, re_key: re.Pattern) -> List[File]:
         """Queries file names to find all files that contain a match for the supplied re_key."""
+
         return [self.files[_k] for _k in self.files.keys() if re_key.search(_k)]
 
 
 @dataclass
 class Wiki:
     """Contains a mapping from job name to Job, and a version string."""
+
     jobs: dict
     version: str
 

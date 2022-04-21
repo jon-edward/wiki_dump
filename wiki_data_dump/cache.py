@@ -78,6 +78,7 @@ def _normalize_name(name: str) -> str:
 
 def _get_today() -> str:
     """Gets date for today in string format [YYYYMMDD]"""
+
     return datetime.date.today().strftime("%Y%m%d")
 
 
@@ -85,6 +86,7 @@ def get_cache(mirror: _Mirror, cache_dir: Optional[str]) -> CacheResult:
     """Gets cached mirror index file, and creates one if none exists.
     Cached filenames are in the format
     './_caches/[mirror_name]__[YYYMMDD of creation].wiki_dump_cache'"""
+
     today = _get_today()
     filename = f"{_normalize_name(mirror.name)}__{today}{CACHE_EXTENSION}"
 

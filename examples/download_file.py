@@ -1,4 +1,5 @@
 """Example explaining how to download a file."""
+
 import re
 
 from wiki_data_dump import WikiDump
@@ -7,11 +8,13 @@ from wiki_data_dump import WikiDump
 def download_completion_hook(_exc_type, _exc_val, _exc_tb):
     """Called after file has finished downloading but not decompressing,
     mirrors __exit__ calls."""
+
     print("completed sites table download")
 
 
 def decompress_completion_hook(_exc_type, _exc_val, _exc_tb):
     """Called after file has finished decompressing, mirrors __exit__ calls."""
+
     #  Completion hooks follow the same function signature as object.__exit__
     print("completed sites table decompression")
 

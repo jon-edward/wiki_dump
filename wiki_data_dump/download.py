@@ -149,6 +149,7 @@ def _download_and_decompress(
 
 def _automatic_resolve_to_location(_from_location: str, _will_decompress: bool) -> str:
     """Holds logic for automatic destination assignment/file suffix cleanup."""
+
     last_term = _from_location.split("/")[-1]
 
     if _will_decompress:

@@ -82,17 +82,20 @@ class WikiDump:
     @property
     def mirror(self):
         """The value contained within the MirrorType enum provided."""
+
         return self._mirror
 
     @mirror.setter
     def mirror(self, other: MirrorType):
         """Changes mirror enum, and handles response update."""
+
         self._mirror = other.value
         self._update_response()
 
     def _update_response(self) -> None:
         """Used internally for getting cached json response contents,
         and caching new index files as needed."""
+
         self._cached_wikis = {}
 
         if not self.use_cache:
@@ -115,6 +118,7 @@ class WikiDump:
     @property
     def response_json(self) -> dict:
         """Contains the raw response from the index.json file on the mirror."""
+
         return copy.deepcopy(
             self._raw_response_json
         )  # Internally, _raw_response_json should be used so copying
@@ -157,6 +161,7 @@ class WikiDump:
         self, wiki_name: str, *, cache: bool = True
     ) -> wiki_data_dump.api_response.Wiki:
         """Get Wiki instance associated with wiki_name. Optionally caches result."""
+
         try:
             return self._cached_wikis[wiki_name]
         except KeyError:
@@ -172,6 +177,7 @@ class WikiDump:
         self, wiki_name: str, job_name: str, *, cache: bool = True
     ) -> wiki_data_dump.api_response.Job:
         """Get Job instance associated with wiki_name and job_name. Optionally caches result."""
+
         wiki = self.get_wiki(wiki_name, cache=cache)
         return wiki.jobs[job_name]
 
@@ -185,12 +191,14 @@ class WikiDump:
     ) -> wiki_data_dump.api_response.File:
         """Get File instance associated with wiki_name, job_name,
         and file_identifier. Optionally caches result."""
+
         job = self.get_job(wiki_name, job_name, cache=cache)
         return job.get_file(file_identifier)
 
     @property
     def wikis(self):
         """Get wiki names for every non-empty wiki in the raw response tree."""
+
         return [
             k
             for k in self._raw_response_json["wikis"].keys()
