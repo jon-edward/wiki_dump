@@ -2,6 +2,7 @@ from wiki_data_dump import WikiDump, Wiki
 
 
 def jobs_for_wiki(wiki_object: Wiki):
+    """Gets jobs for a given Wiki."""
     return wiki_object.jobs.keys()
 
 
