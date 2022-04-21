@@ -1,3 +1,5 @@
+"""Holds core logic for how the library interacts with the data dump."""
+
 import copy
 import re
 import threading

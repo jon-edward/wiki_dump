@@ -1,3 +1,5 @@
+"""Contains an enum that stores necessary data for all available mirrors."""
+
 import enum
 from typing import NamedTuple
 

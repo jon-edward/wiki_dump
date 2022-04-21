@@ -1,3 +1,5 @@
+"""Holds logic for downloading data dump files, with hooks for download progress and completion."""
+
 import bz2
 import functools
 import gzip

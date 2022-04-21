@@ -1,3 +1,5 @@
+"""Holds data classes that represent varying levels of the data dump hierarchy."""
+
 from typing import Optional, Union, List
 import copy
 from dataclasses import dataclass

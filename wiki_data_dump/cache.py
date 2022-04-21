@@ -1,3 +1,5 @@
+"""Handles caching and cache cleaning of a default or custom caching location."""
+
 import os
 import datetime
 import logging
