@@ -2,6 +2,7 @@ import re
 
 from wiki_data_dump import WikiDump
 
+# pylint: disable=C0103
 if __name__ == '__main__':
     wiki = WikiDump()
 
@@ -19,3 +20,4 @@ if __name__ == '__main__':
                                     download_completion_hook=download_completion_hook,
                                     decompress_completion_hook=decompress_completion_hook)
     download_thread.join()
+# pylint: enable=C0103
