@@ -3,7 +3,7 @@
 [![Checks](https://github.com/jon-edward/wiki_dump/actions/workflows/checks.yml/badge.svg)](https://github.com/jon-edward/wiki_dump/actions/workflows/checks.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-A library that assists in traversing and downloading from 
+A tool for traversing and downloading from 
 [Wikimedia Data Dumps](https://dumps.wikimedia.org) and their mirrors.
 
 ## Purpose
